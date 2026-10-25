@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俗常</title>
+<meta name="description" content="俗常的个人主页">
+<style>
+  :root {
+    --paper: #f7f4ee;
+    --ink: #2b2b2b;
+    --ink-light: #7a776f;
+    --accent: #a63d2f;
+    --line: #dcd7cc;
+    --face: #f2eee5;
+    --face-5: #e9ddcf;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+
+  /* ================= 主界面：只有球和名字 ================= */
+  #home {
+    position: fixed; inset: 0; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255,255,255,.5), transparent 62%),
+      radial-gradient(ellipse at center, transparent 55%, rgba(43,43,43,.05) 100%),
+      var(--paper);
+  }
+  #ball { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* 球外两圈缓转的轨迹环 */
+  .orbit {
+    position: absolute; left: 50%; top: 50%;
+    border-radius: 50%;
+    border: 1px dashed rgba(43,43,43,.16);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .orbit.o1 { width: min(78vmin, 660px); height: min(78vmin, 660px); animation: spin 90s linear infinite; }
+  .orbit.o2 { width: min(92vmin, 800px); height: min(92vmin, 800px); border-style: solid; border-color: rgba(43,43,43,.07); animation: spin 140s linear infinite reverse; }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  .hero-center {
+    position: relative; z-index: 2; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: -4vh;
+  }
+  .hero-name {
+    font-size: clamp(56px, 10vw, 120px);
+    letter-spacing: 0.28em; margin-left: 0.28em;
+    font-weight: 600; user-select: none;
+  }
+  .hero-sub { margin-top: 14px; font-size: 14px; letter-spacing: 8px; color: var(--ink-light); }
+  .hero-seal {                        /* 名字下的朱印 */
+    margin-top: 34px;
+    width: 34px; height: 34px;
+    background: var(--accent); color: #f7f4ee;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; letter-spacing: 0;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1.5px rgba(247,244,238,.35);
+    writing-mode: vertical-rl;
+    opacity: .88;
+  }
+  .hero-hint {
+    position: absolute; bottom: 40px; z-index: 2; pointer-events: none;
+    font-size: 12px; letter-spacing: 6px; color: var(--ink-light);
+    opacity: .75; animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { opacity: .4; } 50% { opacity: .85; } }
+
+  /* 主界面退场 */
+  #home.away {
+    opacity: 0; transform: scale(1.06);
+    pointer-events: none;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+
+  /* ================= 通用整屏层 ================= */
+  .screen {
+    position: fixed; inset: 0; z-index: 10;
+    background: var(--paper);
+    overflow-y: auto;
+    opacity: 0; visibility: hidden; transform: translateY(26px);
+    transition: opacity .45s ease, transform .45s ease, visibility .45s;
+  }
+  .screen.open { opacity: 1; visibility: visible; transform: translateY(0); }
+  .back {
+    position: sticky; top: 0; z-index: 5;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 20px 6vw; font-size: 15px; letter-spacing: 4px;
+    color: var(--ink-light);
+    background: rgba(247, 244, 238, 0.9); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    transition: color .25s;
+    width: 100%;
+  }
+  .back:hover { color: var(--accent); }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 110px; }
+
+  /* ================= 入口界面：四枚圆印 ================= */
+  #panel .wrap {
+    max-width: 920px; padding-top: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; min-height: 100%;
+  }
+  .cards {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: clamp(28px, 6vw, 64px);
+  }
+  .card {
+    position: relative;
+    width: clamp(104px, 16vw, 148px); aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform .35s ease;
+  }
+  .card:hover { transform: translateY(-8px); }
+  .card:active { transform: translateY(-3px); }
+  .card::before {                     /* 内环：双环圆印 */
+    content: ""; position: absolute; inset: 8px;
+    border-radius: 50%;
+    border: 1px solid currentColor; opacity: .35;
+    pointer-events: none;
+  }
+  .card .icon { width: 44%; }
+  .card .icon svg { display: block; width: 100%; height: auto; }
+  /* ---------- 入场动画（screen 打开时逐个淡入，不占 transform 以免影响 hover） ---------- */
+  .anim { opacity: 0; }
+  .screen.open .anim { animation: fadeIn .6s ease forwards; animation-delay: var(--d, 0s); }
+  @keyframes fadeIn { to { opacity: 1; } }
+  /* 四枚圆印各自的气质（淡色圆底） */
+  .card-debate  { background: #f0e3dd; color: #7c2d20; }   /* 朱 */
+  .card-daily   { background: #e5ebe8; color: #2f4f4a; }   /* 黛 */
+  .card-contact { background: #efe9dc; color: #6b5b2e; }   /* 墨金 */
+  .card-essay   { background: #e9eee1; color: #4a5d3a; }   /* 竹青 */
+
+  /* ================= 图片页（辩论 / 日常共用） ================= */
+  .sec-title {
+    font-size: 24px; letter-spacing: 10px; margin-bottom: 48px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .sec-title::before {                 /* 标题前的朱红小印 */
+    content: ""; width: 9px; height: 9px; flex: none;
+    background: var(--accent); transform: rotate(45deg);
+  }
+  .sec-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .pic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .pic-grid.stack { grid-template-columns: 1fr; }   /* 横图上下排、完整展示 */
+  .pic {
+    border: 1px solid var(--line); background: #fdfcf9;
+    transition: transform .3s, box-shadow .3s;
+    display: block;
+  }
+  .pic:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(43,43,43,.09); }
+  .pic-img { overflow: hidden; background: #f2eee5; }
+  .pic-img img {
+    width: 100%; height: auto; display: block;      /* 不裁剪，完整显示 */
+    transition: transform .5s ease;
+  }
+  .pic:hover .pic-img img { transform: scale(1.02); }
+  .pic .cap {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px; border-top: 1px solid var(--line);
+  }
+  .pic .cap::before, .pic .cap::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+  }
+  .pic .cap .name { letter-spacing: 6px; font-size: 15px; white-space: nowrap; }
+  .pic .cap .dm {
+    width: 6px; height: 6px; background: var(--accent);
+    transform: rotate(45deg); flex: none;
+  }
+
+  /* ================= 联系 ================= */
+  .essay-list { display: flex; flex-direction: column; }
+  .essay {
+    padding: 26px 4px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .essay .date {
+    font-size: 12px; letter-spacing: 3px;
+    color: var(--ink-light); margin-bottom: 10px;
+  }
+  .essay p { font-size: 17px; line-height: 2; }
+  .contact-box { text-align: center; padding-top: 46px; }
+  .contact-box .end { font-size: 22px; letter-spacing: 12px; margin-bottom: 44px; }
+  .contact-box .wx { font-size: 20px; letter-spacing: 3px; }
+  .contact-box .wx .id { color: var(--accent); }
+  .contact-box .tip { margin-top: 14px; font-size: 13px; color: var(--ink-light); }
+
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .pic-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 主界面 ============ -->
+<div id="home" title="点一下进入">
+  <div class="orbit o1"></div>
+  <div class="orbit o2"></div>
+  <canvas id="ball"></canvas>
+  <div class="hero-center">
+    <div class="hero-name">俗常</div>
+    <div class="hero-sub">SUCHANG</div>
+    <div class="hero-seal">俗常</div>
+  </div>
+  <div class="hero-hint">轻触进入</div>
+</div>
+
+<!-- ============ 入口界面 ============ -->
+<div class="screen" id="panel">
+  <button class="back" data-home>← 俗常</button>
+  <div class="wrap">
+    <div class="cards">
+      <div class="card anim card-debate" style="--d:0.05s" data-page="debate" title="辩论">
+        <div class="icon">
+          <!-- 相对的两个对话气泡：辩论 -->
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 18a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4h-8l-6 6v-6h-6a4 4 0 0 1-4-4z"/>
+            <path d="M56 30a4 4 0 0 0-4-4h-8"/>
+            <path d="M36 34v8a4 4 0 0 1-4 4h-4v6l-6-6h-4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card anim card-daily" style="--d:0.13s" data-page="daily" title="日常">
+        <div class="icon">
+          <!-- 棋盘与星位：万象棋 -->
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="12" y="12" width="40" height="40" rx="3"/>
+            <path d="M25.3 12v40M38.6 12v40M12 25.3h40M12 38.6h40" stroke-width="1.6" opacity=".8"/>
+            <circle cx="32" cy="32" r="5.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card anim card-contact" style="--d:0.21s" data-page="contact" title="联系">
+        <div class="icon">
+          <!-- 鸿雁传书：联系 -->
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 40c8 2 14 0 18-6"/>
+            <path d="M18 22c10-6 22-4 30 4 4 4 6 8 8 14-8-2-12-2-16 0"/>
+            <path d="M26 30c6-2 12-1 16 2"/>
+            <path d="M20 46l-4 8M30 46l-2 6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card anim card-essay" style="--d:0.29s" data-page="essay" title="随笔">
+        <div class="icon">
+          <!-- 毛笔与墨痕：随笔 -->
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M44 10l10 10-24 24-13 3 3-13z"/>
+            <path d="M38 16l10 10"/>
+            <path d="M17 47c-3 2-7 3-9 7 5-1 8-2 10-4" fill="currentColor" stroke="none" opacity=".85"/>
+            <path d="M8 24c4 0 6 2 6 5" stroke-width="1.6" opacity=".6"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 辩论 ============ -->
+<div class="screen" id="page-debate">
+  <button class="back" data-panel>← 回</button>
+  <div class="wrap">
+    <div class="pic-grid">
+      <a class="pic anim" style="--d:0.15s" href="https://search.bilibili.com/all?keyword=%E7%86%8A%E6%B5%A9%20%E6%84%8F%E4%B9%89%E7%9A%84%E5%BB%BA%E6%9E%84" target="_blank" rel="noopener">
+        <div class="pic-img"><img src="xionghao-kunlun.png" alt="熊浩"></div>
+        <div class="cap"><span class="dm"></span><span class="name">昆仑的灵芝</span><span class="dm"></span></div>
+      </a>
+      <a class="pic anim" style="--d:0.27s" href="https://search.bilibili.com/all?keyword=%E6%96%B0%E5%9B%BD%E8%BE%A9%20%E9%BB%84%E6%89%A7%E4%B8%AD%20%E7%86%8A%E6%B5%A9%20%E9%95%BF%E5%AE%89%E7%9A%84%E8%8D%94%E6%9E%9C" target="_blank" rel="noopener">
+        <div class="pic-img"><img src="xionghao-lizhi.png" alt="熊浩"></div>
+        <div class="cap"><span class="dm"></span><span class="name">长安的荔枝</span><span class="dm"></span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 日常 ============ -->
+<div class="screen" id="page-daily">
+  <button class="back" data-panel>← 回</button>
+  <div class="wrap">
+    <div class="pic-grid stack">
+      <div class="pic anim" style="--d:0.05s">
+        <div class="pic-img"><img src="yuhuan.png" alt="玉环"></div>
+        <div class="cap"><span class="dm"></span><span class="name">玉环</span><span class="dm"></span></div>
+      </div>
+      <div class="pic anim" style="--d:0.17s">
+        <div class="pic-img"><img src="zhuangxiaoyu.png" alt="庄小鱼"></div>
+        <div class="cap"><span class="dm"></span><span class="name">庄小鱼</span><span class="dm"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 随笔 ============ -->
+<div class="screen" id="page-essay">
+  <button class="back" data-panel>← 回</button>
+  <div class="wrap">
+    <div class="sec-title anim" style="--d:0.05s">随笔</div>
+    <div class="essay-list">
+      <!-- 想加一条就复制一个 <div class="essay"> 块：日期 + 内容 -->
+      <div class="essay anim" style="--d:0.15s">
+        <div class="date">2026.10.24</div>
+        <p>此处放你想说的话。想写多长都行，一两句也可以。</p>
+      </div>
+      <div class="essay anim" style="--d:0.27s">
+        <div class="date"></div>
+        <p>主页建好了。是个开始。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 联系 ============ -->
+<div class="screen" id="page-contact">
+  <button class="back" data-panel>← 回</button>
+  <div class="wrap contact-box anim" style="--d:0.1s">
+    <div class="end">静而不争</div>
+    <div class="wx">微信：<span class="id">俗常</span></div>
+    <!-- 如果微信号不是“俗常”，改上面 span 里的字 -->
+    <p class="tip">加我时请注明来意</p>
+  </div>
+</div>
+
+<script>
+/* ================= 富勒烯几何（截角二十面体：60 顶点 / 90 边 / 12 五元环 + 20 六元环） ================= */
+function makeFullerene() {
+  const phi = (1 + Math.sqrt(5)) / 2;
+  const base = [[0, 1, 3*phi], [1, 2+phi, 2*phi], [2, 1+2*phi, phi]];
+  const verts = [], seen = new Set();
+  const add = (x, y, z) => {
+    const key = [x,y,z].map(v => v.toFixed(4)).join(',');
+    if (!seen.has(key)) { seen.add(key); verts.push([x, y, z]); }
+  };
+  // 只取偶（循环）排列——全排列会得到 120 个顶点的错误结构
+  const cyc = p => { const [a,b,c] = p; return [[a,b,c],[b,c,a],[c,a,b]]; };
+  for (const p of base) for (const q of cyc(p))
+    for (const sx of [1,-1]) for (const sy of [1,-1]) for (const sz of [1,-1])
+      add(q[0]*sx, q[1]*sy, q[2]*sz);
+
+  const d2 = (a,b) => (a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2;
+  const edges = [], adj = verts.map(() => []);
+  for (let i = 0; i < verts.length; i++)
+    for (let j = i+1; j < verts.length; j++)
+      if (Math.abs(d2(verts[i], verts[j]) - 4) < 1e-6) { edges.push([i,j]); adj[i].push(j); adj[j].push(i); }
+
+  /* ---- 面提取：32 个面法向（五元环法向=正二十面体顶点方向，六元环法向=正十二面体顶点方向），
+         平面聚类 + 边相连校验 ---- */
+  const sub = (a,b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+  const cross = (a,b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+  const dot = (a,b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const norm = a => { const l = Math.hypot(...a); return a.map(v => v/l); };
+
+  const normals = [];
+  for (const p of cyc([0, 1, phi]))                       // 12 个五元环法向
+    for (const sx of [1,-1]) for (const sy of [1,-1]) for (const sz of [1,-1])
+      normals.push(norm([p[0]*sx, p[1]*sy, p[2]*sz]));
+  for (const s of [1,-1]) for (const t of [1,-1]) for (const u of [1,-1])
+    normals.push(norm([s, t, u]));                         // 六元环法向族一
+  for (const p of cyc([0, phi, 1/phi]))                    // 六元环法向族二
+    for (const sx of [1,-1]) for (const sy of [1,-1]) for (const sz of [1,-1])
+      normals.push(norm([p[0]*sx, p[1]*sy, p[2]*sz]));
+
+  const edgeSet = new Set(edges.map(([a,b]) => a < b ? a+'-'+b : b+'-'+a));
+  const isEdge = (a,b) => edgeSet.has(Math.min(a,b)+'-'+Math.max(a,b));
+  const faceMap = new Map();
+  for (const n of normals) {
+    const dots = verts.map(v => dot(v, n));
+    const groups = {};
+    dots.forEach((d, i) => {
+      const k = Math.round(d * 100);
+      (groups[k] = groups[k] || []).push(i);
+    });
+    for (const g of Object.values(groups)) {
+      if (g.length !== 5 && g.length !== 6) continue;
+      const c = [0,1,2].map(k => g.reduce((s,v) => s + verts[v][k], 0) / g.length);
+      const e1 = norm(sub(verts[g[0]], c)), e2 = cross(n, e1);
+      const ang = v => { const d = sub(verts[v], c); return Math.atan2(dot(d,e2), dot(d,e1)); };
+      const s = g.slice().sort((p,q) => ang(p) - ang(q));
+      let ok = true;
+      for (let k = 0; k < s.length; k++)
+        if (!isEdge(s[k], s[(k+1) % s.length])) { ok = false; break; }
+      if (ok) faceMap.set([...s].sort((a,b)=>a-b).join(','), s);
+    }
+  }
+  return { verts, edges, faces: [...faceMap.values()] };
+}
+
+/* ================= 画布渲染（可拖拽自转） ================= */
+function attachBall(canvas, opts) {
+  const ctx = canvas.getContext('2d');
+  const { verts, faces } = makeFullerene();
+  let rx = 0.35, ry = 0.25, vy = 0.0035, vx = 0.0012;
+  let dragging = false, lastX = 0, lastY = 0;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function draw() {
+    const r = canvas.getBoundingClientRect();
+    const cx = r.width / 2, cy = r.height / 2;
+    const R = Math.min(r.width, r.height) * opts.scale;
+    const cy1 = Math.cos(ry), sy1 = Math.sin(ry);
+    const cx1 = Math.cos(rx), sx1 = Math.sin(rx);
+    const pts = verts.map(([x, y, z]) => {
+      let X = x * cy1 + z * sy1, Z = -x * sy1 + z * cy1;
+      let Y = y * cx1 - Z * sx1; Z = y * sx1 + Z * cx1;
+      return { x: cx + X * R / 4.6, y: cy + Y * R / 4.6, z: Z };
+    });
+    ctx.clearRect(0, 0, r.width, r.height);
+    const order = faces
+      .map((f, i) => ({ i, z: f.reduce((s, v) => s + pts[v].z, 0) / f.length }))
+      .sort((a, b) => a.z - b.z);
+    for (const { i } of order) {
+      const f = faces[i];
+      ctx.beginPath();
+      ctx.moveTo(pts[f[0]].x, pts[f[0]].y);
+      for (let k = 1; k < f.length; k++) ctx.lineTo(pts[f[k]].x, pts[f[k]].y);
+      ctx.closePath();
+      ctx.fillStyle = f.length === 5 ? opts.face5 : opts.face6;
+      ctx.fill();
+      ctx.strokeStyle = opts.edge;
+      ctx.lineWidth = opts.lineW || 1;
+      ctx.stroke();
+    }
+  }
+
+  (function loop() {
+    if (!dragging) { ry += vy; rx += vx; }
+    draw();
+    requestAnimationFrame(loop);
+  })();
+
+  canvas.addEventListener('pointerdown', e => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    ry += (e.clientX - lastX) * 0.008;
+    rx += (e.clientY - lastY) * 0.008;
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  canvas.addEventListener('pointerup', () => { dragging = false; });
+}
+
+const css = getComputedStyle(document.documentElement);
+attachBall(document.getElementById('ball'), {
+  scale: 0.86, lineW: 1,
+  face6: css.getPropertyValue('--face').trim(),
+  face5: css.getPropertyValue('--face-5').trim(),
+  edge: '#8f8a7e'
+});
+
+/* ================= 主界面 → 入口界面 → 各页 ================= */
+const home = document.getElementById('home');
+const panel = document.getElementById('panel');
+const screens = { panel };
+document.querySelectorAll('.screen[id^="page-"]').forEach(s => screens[s.id] = s);
+
+// 主界面点击（拖动球超过一小段距离不算点击）
+let downX = 0, downY = 0;
+home.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
+home.addEventListener('pointerup', e => {
+  if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) return; // 是拖拽
+  home.classList.add('away');
+  panel.classList.add('open');
+});
+
+function closeAll() {
+  Object.values(screens).forEach(s => s.classList.remove('open'));
+}
+// 入口卡片 → 各页
+document.querySelectorAll('#panel .card').forEach(c => {
+  c.addEventListener('click', () => {
+    const p = screens['page-' + c.dataset.page];
+    closeAll();
+    p.classList.add('open');
+    p.scrollTop = 0;
+  });
+});
+// 返回按钮
+document.querySelectorAll('[data-panel]').forEach(b =>
+  b.addEventListener('click', () => { closeAll(); panel.classList.add('open'); }));
+document.querySelectorAll('[data-home]').forEach(b =>
+  b.addEventListener('click', () => { closeAll(); home.classList.remove('away'); }));
+// Esc 逐级返回
+window.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const opened = Object.values(screens).find(s => s.classList.contains('open'));
+  if (!opened) return;
+  if (opened === panel) { closeAll(); home.classList.remove('away'); }
+  else { closeAll(); panel.classList.add('open'); }
+});
+</script>
+</body>
+</html>
