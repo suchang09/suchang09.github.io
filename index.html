@@ -38,22 +38,28 @@
       var(--paper);
   }
   #ball { position: absolute; inset: 0; width: 100%; height: 100%; }
-  /* 球外两圈缓转的轨迹环 */
-  .orbit {
-    position: absolute; left: 50%; top: 50%;
-    border-radius: 50%;
-    border: 1px dashed rgba(43,43,43,.16);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
+  /* 四角常驻入口 */
+  .corner {
+    position: absolute; z-index: 3;
+    font-size: 15px; letter-spacing: 6px;
+    color: var(--ink-light); cursor: pointer;
+    padding: 28px 36px; user-select: none;
+    display: flex; align-items: center; gap: 10px;
+    transition: color .25s;
+    opacity: 0; animation: cornerIn 1s ease .4s forwards;
   }
-  .orbit.o1 { width: min(78vmin, 660px); height: min(78vmin, 660px); animation: spin 90s linear infinite; }
-  .orbit.o2 { width: min(92vmin, 800px); height: min(92vmin, 800px); border-style: solid; border-color: rgba(43,43,43,.07); animation: spin 140s linear infinite reverse; }
-  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-  .hero-center {
-    position: relative; z-index: 2; pointer-events: none;
-    display: flex; flex-direction: column; align-items: center;
-    margin-top: -4vh;
+  @keyframes cornerIn { to { opacity: 1; } }
+  .corner:hover { color: var(--accent); }
+  .corner::before {
+    content: ""; width: 6px; height: 6px; flex: none;
+    background: var(--accent); transform: rotate(45deg);
+    opacity: .75;
   }
+  .corner.c-tl { top: 0; left: 0; }
+  .corner.c-tr { top: 0; right: 0; }
+  .corner.c-bl { bottom: 0; left: 0; }
+  .corner.c-br { bottom: 0; right: 0; }
+  .hero-hint { bottom: 40px; }
   .hero-name {
     font-size: clamp(56px, 10vw, 120px);
     letter-spacing: 0.28em; margin-left: 0.28em;
@@ -193,6 +199,18 @@
     color: var(--ink-light); margin-bottom: 10px;
   }
   .essay p { font-size: 17px; line-height: 2; }
+  /* ================= 名字来源 ================= */
+  .name-box { text-align: center; padding-top: 60px; }
+  .name-box .n-title {
+    font-size: clamp(56px, 9vw, 88px);
+    letter-spacing: .3em; margin-left: .3em; font-weight: 600;
+  }
+  .name-box .n-quote { margin-top: 46px; font-size: 20px; line-height: 2.4; letter-spacing: 4px; }
+  .name-box .n-sep {
+    width: 9px; height: 9px; margin: 44px auto;
+    background: var(--accent); transform: rotate(45deg);
+  }
+  .name-box .n-note { font-size: 14px; color: var(--ink-light); letter-spacing: 3px; }
   .contact-box { text-align: center; padding-top: 46px; }
   .contact-box .end { font-size: 22px; letter-spacing: 12px; margin-bottom: 44px; }
   .contact-box .wx { font-size: 20px; letter-spacing: 3px; }
@@ -211,71 +229,17 @@
 
 <!-- ============ 主界面 ============ -->
 <div id="home" title="点一下进入">
-  <div class="orbit o1"></div>
-  <div class="orbit o2"></div>
   <canvas id="ball"></canvas>
-  <div class="hero-center">
-    <div class="hero-name">俗常</div>
-    <div class="hero-sub">SUCHANG</div>
-    <div class="hero-seal">俗常</div>
-  </div>
-  <div class="hero-hint">轻触进入</div>
-</div>
-
-<!-- ============ 入口界面 ============ -->
-<div class="screen" id="panel">
-  <button class="back" data-home>← 俗常</button>
-  <div class="wrap">
-    <div class="cards">
-      <div class="card anim card-debate" style="--d:0.05s" data-page="debate" title="辩论">
-        <div class="icon">
-          <!-- 相对的两个对话气泡：辩论 -->
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 18a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4h-8l-6 6v-6h-6a4 4 0 0 1-4-4z"/>
-            <path d="M56 30a4 4 0 0 0-4-4h-8"/>
-            <path d="M36 34v8a4 4 0 0 1-4 4h-4v6l-6-6h-4"/>
-          </svg>
-        </div>
-      </div>
-      <div class="card anim card-daily" style="--d:0.13s" data-page="daily" title="日常">
-        <div class="icon">
-          <!-- 棋盘与星位：万象棋 -->
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="12" y="12" width="40" height="40" rx="3"/>
-            <path d="M25.3 12v40M38.6 12v40M12 25.3h40M12 38.6h40" stroke-width="1.6" opacity=".8"/>
-            <circle cx="32" cy="32" r="5.5" fill="currentColor" stroke="none"/>
-          </svg>
-        </div>
-      </div>
-      <div class="card anim card-contact" style="--d:0.21s" data-page="contact" title="联系">
-        <div class="icon">
-          <!-- 鸿雁传书：联系 -->
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 40c8 2 14 0 18-6"/>
-            <path d="M18 22c10-6 22-4 30 4 4 4 6 8 8 14-8-2-12-2-16 0"/>
-            <path d="M26 30c6-2 12-1 16 2"/>
-            <path d="M20 46l-4 8M30 46l-2 6"/>
-          </svg>
-        </div>
-      </div>
-      <div class="card anim card-essay" style="--d:0.29s" data-page="essay" title="随笔">
-        <div class="icon">
-          <!-- 毛笔与墨痕：随笔 -->
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M44 10l10 10-24 24-13 3 3-13z"/>
-            <path d="M38 16l10 10"/>
-            <path d="M17 47c-3 2-7 3-9 7 5-1 8-2 10-4" fill="currentColor" stroke="none" opacity=".85"/>
-            <path d="M8 24c4 0 6 2 6 5" stroke-width="1.6" opacity=".6"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
+  <a class="corner c-tl" data-corner="debate">辩论</a>
+  <a class="corner c-tr" data-corner="daily">日常</a>
+  <a class="corner c-bl" data-corner="essay">随笔</a>
+  <a class="corner c-br" data-corner="contact">联系</a>
+  <div class="hero-hint">拖动旋转 · 点击环上的图或字进入</div>
 </div>
 
 <!-- ============ 辩论 ============ -->
 <div class="screen" id="page-debate">
-  <button class="back" data-panel>← 回</button>
+  <button class="back" data-home>← 俗常</button>
   <div class="wrap">
     <div class="pic-grid">
       <a class="pic anim" style="--d:0.15s" href="https://search.bilibili.com/all?keyword=%E7%86%8A%E6%B5%A9%20%E6%84%8F%E4%B9%89%E7%9A%84%E5%BB%BA%E6%9E%84" target="_blank" rel="noopener">
@@ -292,7 +256,7 @@
 
 <!-- ============ 日常 ============ -->
 <div class="screen" id="page-daily">
-  <button class="back" data-panel>← 回</button>
+  <button class="back" data-home>← 俗常</button>
   <div class="wrap">
     <div class="pic-grid stack">
       <div class="pic anim" style="--d:0.05s">
@@ -309,7 +273,7 @@
 
 <!-- ============ 随笔 ============ -->
 <div class="screen" id="page-essay">
-  <button class="back" data-panel>← 回</button>
+  <button class="back" data-home>← 俗常</button>
   <div class="wrap">
     <div class="sec-title anim" style="--d:0.05s">随笔</div>
     <div class="essay-list">
@@ -326,9 +290,23 @@
   </div>
 </div>
 
+<!-- ============ 名字来源 ============ -->
+<div class="screen" id="page-name">
+  <button class="back" data-home>← 俗常</button>
+  <div class="wrap name-box anim" style="--d:0.1s">
+    <div class="n-title">俗常</div>
+    <div class="n-quote">
+      <p>生而热烈，藏与俗常；</p>
+      <p>心有山海，静而不争。</p>
+    </div>
+    <div class="n-sep"></div>
+    <p class="n-note">名字取自这句话。</p>
+  </div>
+</div>
+
 <!-- ============ 联系 ============ -->
 <div class="screen" id="page-contact">
-  <button class="back" data-panel>← 回</button>
+  <button class="back" data-home>← 俗常</button>
   <div class="wrap contact-box anim" style="--d:0.1s">
     <div class="end">静而不争</div>
     <div class="wx">微信：<span class="id">俗常</span></div>
@@ -405,8 +383,32 @@ function makeFullerene() {
 function attachBall(canvas, opts) {
   const ctx = canvas.getContext('2d');
   const { verts, faces } = makeFullerene();
-  let rx = 0.35, ry = 0.25, vy = 0.0035, vx = 0.0012;
-  let dragging = false, lastX = 0, lastY = 0;
+  let rx = 0.35, ry = 0.25, trx = 0.35, try_ = 0.25;   // 当前角与目标角（缓动逼近）
+  let vy = 0.0035, vx = 0.0012;
+  let dragging = false, moved = false, lastX = 0, lastY = 0;
+  let lastPts = null, lastRect = null;
+
+  // 面内容：一对一、随机分配到不同的面上，空着的面保持素色，留作以后添加
+  const photos = (opts.photos || []).map(p => {
+    const im = new Image(); im.src = p.src; return { im, page: p.page };
+  });
+  const chars = opts.chars || [];
+  const shuffled = arr => arr.slice().sort(() => Math.random() - 0.5);
+  const hexFaces = shuffled(faces.map((f, i) => i).filter(i => faces[i].length === 6));
+  const pentFaces = shuffled(faces.map((f, i) => i).filter(i => faces[i].length === 5));
+  const faceContent = faces.map((f, i) => {
+    const h = hexFaces.indexOf(i);
+    if (f.length === 6 && h > -1 && h < photos.length) {
+      const p = photos[h];
+      return { type: 'img', im: p.im, page: p.page };
+    }
+    const p5 = pentFaces.indexOf(i);
+    if (f.length === 5 && p5 > -1 && p5 < chars.length) {
+      const c = chars[p5];
+      return { type: 'char', ch: c.ch, page: c.page };
+    }
+    return null;
+  });
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
@@ -423,95 +425,224 @@ function attachBall(canvas, opts) {
     const R = Math.min(r.width, r.height) * opts.scale;
     const cy1 = Math.cos(ry), sy1 = Math.sin(ry);
     const cx1 = Math.cos(rx), sx1 = Math.sin(rx);
-    const pts = verts.map(([x, y, z]) => {
+    const proj = ([x, y, z]) => {
       let X = x * cy1 + z * sy1, Z = -x * sy1 + z * cy1;
       let Y = y * cx1 - Z * sx1; Z = y * sx1 + Z * cx1;
       return { x: cx + X * R / 4.6, y: cy + Y * R / 4.6, z: Z };
-    });
+    };
+    const pts = verts.map(proj);
     ctx.clearRect(0, 0, r.width, r.height);
+    lastPts = pts; lastRect = r;
     const order = faces
       .map((f, i) => ({ i, z: f.reduce((s, v) => s + pts[v].z, 0) / f.length }))
       .sort((a, b) => a.z - b.z);
     for (const { i } of order) {
-      const f = faces[i];
+      const f = faces[i], fc = faceContent[i];
+      const fp = f.map(v => pts[v]);
       ctx.beginPath();
-      ctx.moveTo(pts[f[0]].x, pts[f[0]].y);
-      for (let k = 1; k < f.length; k++) ctx.lineTo(pts[f[k]].x, pts[f[k]].y);
+      ctx.moveTo(fp[0].x, fp[0].y);
+      for (let k = 1; k < fp.length; k++) ctx.lineTo(fp[k].x, fp[k].y);
       ctx.closePath();
-      ctx.fillStyle = f.length === 5 ? opts.face5 : opts.face6;
-      ctx.fill();
+      const isFront = fp.reduce((s, p) => s + p.z, 0) / fp.length > 0;
+      const hasContent = (opts.photos && opts.photos.length) || (opts.chars && opts.chars.length);
+      if (hasContent && fc && isFront) {
+        if (fc.type === 'img' && fc.im && fc.im.complete && fc.im.naturalWidth) {
+          // 仿射贴图：以“世界竖直方向”在面上的投影定图片的上下，图片永远头朝上贴在球面
+          const c3 = [0,1,2].map(k => f.reduce((s, v) => s + verts[v][k], 0) / f.length);
+          const nLen = Math.hypot(...c3);
+          const n3 = c3.map(v => v / nLen);
+          // 屏幕“上”在世界坐标里是 -Y（投影 y = cy + Y*scale，canvas 的 y 向下）
+          const WUP = [0, -1, 0];
+          const dn = WUP[0]*n3[0] + WUP[1]*n3[1] + WUP[2]*n3[2];
+          const upP = WUP.map((v, k) => v - dn * n3[k]);
+          const upLen = Math.hypot(...upP);
+          let e1, e2;
+          if (upLen > 0.25) {
+            const uHat = upP.map(v => v / upLen);   // 面上的“上”
+            e2 = uHat.map(v => -v);                 // 图片的“下”轴
+            e1 = [ e2[1]*n3[2]-e2[2]*n3[1], e2[2]*n3[0]-e2[0]*n3[2], e2[0]*n3[1]-e2[1]*n3[0] ]; // 右 = 下 × 法向
+          } else {
+            // 极点附近的面：退回用顶点方向
+            e1 = verts[f[0]].map((x, k) => x - c3[k]);
+            const eLen2 = Math.hypot(...e1);
+            e1 = e1.map(v => v / eLen2);
+            e2 = [n3[1]*e1[2]-n3[2]*e1[1], n3[2]*e1[0]-n3[0]*e1[2], n3[0]*e1[1]-n3[1]*e1[0]];
+          }
+          const circum = Math.max(...f.map(v =>
+            Math.hypot(verts[v][0]-c3[0], verts[v][1]-c3[1], verts[v][2]-c3[2]))) * 1.04;
+          const P0 = proj(c3);
+          const Pu = proj(c3.map((x, k) => x + e1[k] * circum));
+          const Pv = proj(c3.map((x, k) => x + e2[k] * circum));
+          ctx.save(); ctx.clip();
+          ctx.transform(Pu.x - P0.x, Pu.y - P0.y, Pv.x - P0.x, Pv.y - P0.y, P0.x, P0.y);
+          ctx.drawImage(fc.im, -1, -1, 2, 2);
+          ctx.restore();
+        } else if (fc.type === 'char' && fc.ch) {
+          // 朱文印：素白底 + 细朱圆圈 + 朱红楷体竖排
+          ctx.fillStyle = '#fbf8f1';
+          ctx.fill();
+          const cx0 = fp.reduce((s, p) => s + p.x, 0) / fp.length;
+          const cy0 = fp.reduce((s, p) => s + p.y, 0) / fp.length;
+          const circum0 = Math.min(...fp.map(p => Math.hypot(p.x - cx0, p.y - cy0)));
+          const inr = circum0 * Math.cos(Math.PI / f.length);   // 面内切圆半径
+          ctx.strokeStyle = '#a63d2f';
+          ctx.lineWidth = Math.max(1, opts.lineW || 1);
+          ctx.beginPath(); ctx.arc(cx0, cy0, inr * 0.92, 0, Math.PI * 2); ctx.stroke();
+          const chs = [...fc.ch];
+          const fs = Math.min(inr * 0.62, inr * 1.55 / chs.length);
+          ctx.fillStyle = '#a63d2f';
+          ctx.font = fs + 'px "KaiTi","STKaiti","Noto Serif SC","SimSun",serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          chs.forEach((ch, k) => {
+            ctx.fillText(ch, cx0, cy0 + (k - (chs.length - 1) / 2) * fs * 1.15);
+          });
+        } else {
+          ctx.fillStyle = f.length === 5 ? opts.face5 : opts.face6;
+          ctx.fill();
+        }
+      } else {
+        // 背面或没有内容：素色
+        ctx.fillStyle = f.length === 5 ? opts.face5 : opts.face6;
+        ctx.fill();
+      }
       ctx.strokeStyle = opts.edge;
       ctx.lineWidth = opts.lineW || 1;
       ctx.stroke();
     }
   }
 
+  window.__ballDraw = draw;   // 调试探针（也便于无动画环境手动重绘）
+  // 右键：把正对着观众的面（优先有内容的面）转到正中央
+  function snapToFront() {
+    if (!lastPts) return;
+    let best = -1, bestZ = -1, bestC = -1, bestCZ = -1;
+    faces.forEach((f, i) => {
+      const z = f.reduce((s, v) => s + lastPts[v].z, 0) / f.length;
+      if (z > bestZ) { bestZ = z; best = i; }
+      if (faceContent[i] && z > 0 && z > bestCZ) { bestCZ = z; bestC = i; }
+    });
+    const f = faces[bestC > -1 ? bestC : best];
+    const c3 = [0,1,2].map(k => f.reduce((s, v) => s + verts[v][k], 0) / f.length);
+    const nLen = Math.hypot(...c3);
+    const nx = c3[0] / nLen, ny = c3[1] / nLen, nz = c3[2] / nLen;
+    trx = Math.atan2(ny, Math.hypot(nx, nz));
+    let ty = Math.atan2(-nx, nz);
+    // 就近转过去（不绕远路）
+    while (ty - try_ > Math.PI) ty -= 2 * Math.PI;
+    while (ty - try_ < -Math.PI) ty += 2 * Math.PI;
+    try_ = ty;
+  }
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    snapToFront();
+  });
+  // 滚轮：平滑滚动（目标角 + 缓动）
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    trx += e.deltaY * 0.0018;
+  }, { passive: false });
+
   (function loop() {
-    if (!dragging) { ry += vy; rx += vx; }
+    if (!dragging) {
+      rx += (trx - rx) * 0.22;
+      ry += (try_ - ry) * 0.22;
+      if (Math.abs(trx - rx) < 0.0008 && Math.abs(try_ - ry) < 0.0008) { trx += vx; try_ += vy; }
+    }
     draw();
     requestAnimationFrame(loop);
   })();
 
   canvas.addEventListener('pointerdown', e => {
-    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    if (e.button !== 0) return;            // 只有左键拖拽
+    dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointermove', e => {
     if (!dragging) return;
-    ry += (e.clientX - lastX) * 0.008;
-    rx += (e.clientY - lastY) * 0.008;
+    if (Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY) > 3) moved = true;
+    try_ += (e.clientX - lastX) * 0.008;
+    trx += (e.clientY - lastY) * 0.008;
+    ry = try_; rx = trx;                      // 拖拽时零延迟跟随
     lastX = e.clientX; lastY = e.clientY;
   });
-  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointerup', e => {
+    dragging = false;
+    if (moved || !lastPts || !opts.onNav) return;
+    // 命中检测：从最靠前的面往后找，点到带内容的面就跳转
+    const rect = canvas.getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    const hits = faces
+      .map((f, i) => ({ i, z: f.reduce((s, v) => s + lastPts[v].z, 0) / f.length }))
+      .sort((a, b) => b.z - a.z);
+    for (const { i } of hits) {
+      const fp = faces[i].map(v => lastPts[v]);
+      if (!inPoly(px, py, fp)) continue;
+      const fc = faceContent[i];
+      if (fc && fc.page) opts.onNav(fc.page);
+      return;
+    }
+  });
+  function inPoly(x, y, fp) {   // 射线法判断点是否在多边形内
+    let inside = false;
+    for (let a = 0, b = fp.length - 1; a < fp.length; b = a++) {
+      if ((fp[a].y > y) !== (fp[b].y > y) &&
+          x < (fp[b].x - fp[a].x) * (y - fp[a].y) / (fp[b].y - fp[a].y) + fp[a].x)
+        inside = !inside;
+    }
+    return inside;
+  }
 }
 
 const css = getComputedStyle(document.documentElement);
 attachBall(document.getElementById('ball'), {
-  scale: 0.86, lineW: 1,
+  scale: 0.9, lineW: 1,
+  // 一对一：目前只放熊浩的一张（点击进辩论页，那页是两张图的介绍）。
+  // 以后长了新内容，往 photos / chars 各加一条即可，第 N 条贴到第 N 个六元环 / 五元环上，其余留空。
+  photos: [
+    { src: 'xionghao-kunlun.png', page: 'debate' },
+    { src: 'benke.png', page: null },       // 本科（暂无对应页面，点了不跳转）
+    { src: 'wanxiangqi.png', page: 'daily' }, // 万象棋 → 日常页（玉环、庄小鱼）
+    { src: 'photo5.png', page: null },        // 新增图片（对应界面待定）
+    { src: 'photo6.png', page: null }         // 新增图片（对应界面待定）
+  ],
+  chars: [
+    { ch: '俗常', page: 'name' },
+    { ch: '26', page: null }                // 26（对应界面待定，点了不跳转）
+  ],
+  onNav: page => openPage(page),
   face6: css.getPropertyValue('--face').trim(),
   face5: css.getPropertyValue('--face-5').trim(),
   edge: '#8f8a7e'
 });
 
-/* ================= 主界面 → 入口界面 → 各页 ================= */
+/* ================= 球面 → 各页 ================= */
 const home = document.getElementById('home');
-const panel = document.getElementById('panel');
-const screens = { panel };
+const screens = {};
 document.querySelectorAll('.screen[id^="page-"]').forEach(s => screens[s.id] = s);
-
-// 主界面点击（拖动球超过一小段距离不算点击）
-let downX = 0, downY = 0;
-home.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
-home.addEventListener('pointerup', e => {
-  if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) return; // 是拖拽
-  home.classList.add('away');
-  panel.classList.add('open');
-});
 
 function closeAll() {
   Object.values(screens).forEach(s => s.classList.remove('open'));
 }
-// 入口卡片 → 各页
-document.querySelectorAll('#panel .card').forEach(c => {
-  c.addEventListener('click', () => {
-    const p = screens['page-' + c.dataset.page];
-    closeAll();
-    p.classList.add('open');
-    p.scrollTop = 0;
-  });
-});
-// 返回按钮
-document.querySelectorAll('[data-panel]').forEach(b =>
-  b.addEventListener('click', () => { closeAll(); panel.classList.add('open'); }));
+function openPage(page) {
+  closeAll();
+  home.classList.add('away');
+  const p = screens['page-' + page];
+  p.classList.add('open');
+  p.scrollTop = 0;
+}
+function goHome() {
+  closeAll();
+  home.classList.remove('away');
+}
+// 各页返回按钮 → 主界面
 document.querySelectorAll('[data-home]').forEach(b =>
-  b.addEventListener('click', () => { closeAll(); home.classList.remove('away'); }));
-// Esc 逐级返回
+  b.addEventListener('click', goHome));
+// 四角常驻入口
+document.querySelectorAll('.corner').forEach(a =>
+  a.addEventListener('click', e => { e.stopPropagation(); openPage(a.dataset.corner); }));
+// Esc 回主界面
 window.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  const opened = Object.values(screens).find(s => s.classList.contains('open'));
-  if (!opened) return;
-  if (opened === panel) { closeAll(); home.classList.remove('away'); }
-  else { closeAll(); panel.classList.add('open'); }
+  if (e.key === 'Escape') goHome();
 });
 </script>
 </body>
